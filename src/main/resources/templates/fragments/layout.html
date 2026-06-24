@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="html">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${title} + ' | Ventas Online'">Ventas Online</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+
+<aside class="sidebar" th:fragment="sidebar">
+    <div class="sidebar-brand"><span>👟</span><span>Ventas Online</span></div>
+    <nav class="sidebar-nav">
+        <a th:href="@{/}"><span class="icon">🏠</span><span>Dashboard</span></a>
+        <a th:href="@{/ventas}"><span class="icon">🧾</span><span>Ventas</span></a>
+    </nav>
+    <div class="sidebar-footer">
+        <span style="color:#4ade80;">● Vendedor</span>
+    </div>
+</aside>
+
+<div th:fragment="deleteModal" id="deleteModal" class="modal-overlay">
+    <div class="modal">
+        <h3>⚠️ Confirmar eliminación</h3>
+        <p>¿Estás seguro que deseas eliminar <strong id="deleteItemName">este registro</strong>? Esta acción no se puede deshacer.</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancelar</button>
+            <a id="btnConfirmDelete" class="btn btn-danger" href="#">Sí, eliminar</a>
+        </div>
+    </div>
+</div>
+
+<div th:fragment="scripts">
+    <script th:src="@{/js/app.js}"></script>
+    <script>
+        function openDeleteModal(url, nombre) {
+            document.getElementById('deleteItemName').textContent = nombre;
+            document.getElementById('btnConfirmDelete').href = url;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.addEventListener('click', function(e) {
+                var btn = e.target.closest('.btn-delete');
+                if (btn) {
+                    e.preventDefault();
+                    openDeleteModal(btn.getAttribute('data-url'), btn.getAttribute('data-name'));
+                }
+            });
+        });
+    </script>
+</div>
+</html>

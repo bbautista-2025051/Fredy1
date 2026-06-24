@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<aside th:replace="~{fragments/layout :: sidebar}"></aside>
+<div class="main-content">
+    <div class="topbar"><h1>&#127968; Dashboard</h1></div>
+    <div class="page-content">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon yellow">&#129534;</div><div><div class="stat-value" th:text="${ventasCount}">0</div><div class="stat-label">Ventas totales</div></div></div>
+        </div>
+        
+        <div class="card" style="margin-bottom:24px">
+            <div class="card-header"><h2>Accesos Rápidos</h2></div>
+            <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap">
+                <a th:href="@{/ventas/nuevo}" class="btn btn-warning">Nueva Venta</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h2>Ventas Recientes</h2><a th:href="@{/ventas}" class="btn btn-secondary btn-sm">Ver todas</a></div>
+            <div class="card-body" style="padding:0">
+                <div th:if="${#lists.isEmpty(ventasRecientes)}" class="empty-state"><div class="icon">&#129534;</div><p>No hay ventas registradas aún.</p></div>
+                <div th:if="${not #lists.isEmpty(ventasRecientes)}" class="table-responsive">
+                    <table class="table">
+                        <thead>
+                        <tr><th>#</th><th>Fecha</th><th>Teléfono</th><th>Total</th><th>Estado</th><th>Acción</th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="v : ${ventasRecientes}">
+                            <td th:text="${v.codigoVenta}"></td>
+                            <td th:text="${#dates.format(new java.util.Date(v.fechaVenta), 'dd/MM/yyyy')}"></td>
+                            <td th:text="${v.telefonoReferencia != null ? v.telefonoReferencia : 'N/A'}"></td>
+                            <td>Q. <span th:text="${#numbers.formatDecimal(v.total, 1, 2)}"></span></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${'badge-' + (v.estado != null ? v.estado.name() : 'PAGADO')}"
+                                      th:text="${v.estado != null ? v.estado.etiqueta : '-'}"></span>
+                            </td>
+                            <td><a th:href="@{/ventas/editar/{token}(token=${v.encryptedId})}" class="btn btn-warning btn-sm">Ver</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

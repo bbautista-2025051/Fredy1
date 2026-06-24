@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Ventas')}"></head>
+<style>
+/* Badges de estado */
+.badge-PAGADO     { background:#dcfce7; color:#15803d; }
+.badge-ENVIADO    { background:#dbeafe; color:#1d4ed8; }
+.badge-PEDIDO    { background:#ede9fe; color:#6d28d9; }
+.badge-ENTREGADO  { background:#ccfbf1; color:#0f766e; }
+.badge-DEVOLUCION { background:#fef9c3; color:#b45309; }
+.badge-CANCELADO  { background:#fee2e2; color:#b91c1c; }
+.badge-INVENTARIO { background:#f3f4f6; color:#374151; }
+.badge { display:inline-block; padding:3px 10px; border-radius:99px; font-size:.78rem; font-weight:700; }
+
+/* Chip de estilo */
+.estilo-chip {
+    display:inline-block; padding:3px 10px; border-radius:99px;
+    background:#f1f5f9; font-size:.8rem; font-weight:600; color:#334155;
+}
+
+/* Dot de color */
+.color-wrap { display:inline-flex; align-items:center; gap:6px; }
+.dot { width:12px; height:12px; border-radius:50%; border:1px solid rgba(0,0,0,.15); flex-shrink:0; display:inline-block; }
+.dot-NEGRO  { background:#1e1e1e; }
+.dot-CAFE   { background:#7c5c3d; }
+.dot-GENA   { background:linear-gradient(135deg,#a8edea,#fed6e3); }
+.dot-BEIGE  { background:#d4b896; }
+.dot-BLANCO { background:#e5e7eb; }
+
+/* Talla */
+.talla-badge {
+    display:inline-block; width:32px; height:32px; line-height:32px;
+    text-align:center; border-radius:8px; background:#e0f2fe;
+    color:#0369a1; font-weight:700; font-size:.85rem;
+}
+
+/* Separador de mes */
+.mes-header {
+    display:flex; align-items:center; gap:12px;
+    padding:10px 0 6px; margin-top:8px;
+}
+.mes-header-label {
+    font-size:.8rem; text-transform:uppercase; letter-spacing:.08em;
+    font-weight:700; color:var(--text-muted); white-space:nowrap;
+}
+.mes-header-line { flex:1; height:1px; background:var(--border); }
+.mes-header-count {
+    font-size:.75rem; font-weight:700; padding:2px 10px;
+    border-radius:99px; background:#f1f5f9; color:#64748b; white-space:nowrap;
+}
+
+/* Stats */
+.stats-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; margin-bottom:20px; }
+.stat-card { background:var(--card-bg); border-radius:10px; padding:14px 16px; box-shadow:var(--shadow); }
+.stat-label { font-size:.73rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; display:block; margin-bottom:4px; }
+.stat-value { font-size:1.5rem; font-weight:700; color:var(--text); }
+
+/* Filtros */
+.filtros-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+.filtro-btn { padding:6px 14px; border-radius:99px; border:2px solid var(--border); background:var(--card-bg); font-size:.8rem; font-weight:600; cursor:pointer; transition:all .2s; color:var(--text-muted); }
+.filtro-btn:hover, .filtro-btn.active { border-color:var(--primary); color:var(--primary); background:#eff6ff; }
+.filtro-btn.f-PAGADO.active     { border-color:#16a34a; color:#16a34a; background:#f0fdf4; }
+.filtro-btn.f-ENVIADO.active    { border-color:#1d4ed8; color:#1d4ed8; background:#eff6ff; }
+.filtro-btn.f-PEDIDO.active    { border-color:#7c3aed; color:#7c3aed; background:#f5f3ff; }
+.filtro-btn.f-ENTREGADO.active  { border-color:#0f766e; color:#0f766e; background:#f0fdfa; }
+.filtro-btn.f-DEVOLUCION.active { border-color:#d97706; color:#d97706; background:#fffbeb; }
+.filtro-btn.f-CANCELADO.active  { border-color:#dc2626; color:#dc2626; background:#fef2f2; }
+.filtro-btn.f-INVENTARIO.active { border-color:#6366f1; color:#6366f1; background:#f5f3ff; }
+.table td { vertical-align:middle; }
+</style>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+    <main class="main-content">
+        <div class="page-header">
+            <h1>Ventas en Linea</h1>
+            <a th:href="@{/ventas/nuevo}" class="btn btn-primary">+ Nueva Venta</a>
+        </div>
+        <div class="page-content">
+            <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+            <div th:if="${errorMsg}" class="alert alert-error" th:text="${errorMsg}"></div>
+
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <span class="stat-label">Total</span>
+                    <span class="stat-value" th:text="${#lists.size(ventas)}">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" style="color:#16a34a">Pagadas</span>
+                    <span class="stat-value" th:text="${#lists.size(ventas.?[estado != null and estado.name() == 'PAGADO'])}">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" style="color:#1d4ed8">Enviadas</span>
+                    <span class="stat-value" th:text="${#lists.size(ventas.?[estado != null and estado.name() == 'ENVIADO'])}">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" style="color:#7c3aed">Pedido</span>
+                    <span class="stat-value" th:text="${#lists.size(ventas.?[estado != null and estado.name() == 'PEDIDO'])}">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" style="color:#0f766e">Entregadas</span>
+                    <span class="stat-value" th:text="${#lists.size(ventas.?[estado != null and estado.name() == 'ENTREGADO'])}">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" style="color:#b45309">Devoluciones</span>
+                    <span class="stat-value" th:text="${#lists.size(ventas.?[estado != null and estado.name() == 'DEVOLUCION'])}">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" style="color:#b91c1c">Canceladas</span>
+                    <span class="stat-value" th:text="${#lists.size(ventas.?[estado != null and estado.name() == 'CANCELADO'])}">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label" style="color:#374151">Inventario</span>
+                    <span class="stat-value" th:text="${#lists.size(ventas.?[estado != null and estado.name() == 'INVENTARIO'])}">0</span>
+                </div>
+            </div>
+
+            <!-- Filtros + busqueda -->
+            <div class="filtros-bar">
+                <button class="filtro-btn active" data-filter="ALL">Todas</button>
+                <button class="filtro-btn f-PAGADO"     data-filter="PAGADO">Pagadas</button>
+                <button class="filtro-btn f-ENVIADO"    data-filter="ENVIADO">Enviado</button>
+                <button class="filtro-btn f-PEDIDO"    data-filter="PEDIDO">Pedido</button>
+                <button class="filtro-btn f-ENTREGADO"  data-filter="ENTREGADO">Entregado</button>
+                <button class="filtro-btn f-DEVOLUCION" data-filter="DEVOLUCION">Devolucion</button>
+                <button class="filtro-btn f-CANCELADO"  data-filter="CANCELADO">Canceladas</button>
+                <button class="filtro-btn f-INVENTARIO" data-filter="INVENTARIO">Inventario</button>
+                <input type="text" id="busquedaInput" class="form-control" style="max-width:220px;margin-left:auto"
+                       placeholder="Buscar guia, telefono...">
+            </div>
+
+            <!-- Tabla agrupada por mes (el agrupamiento lo hace JS) -->
+            <div class="card" style="overflow-x:auto">
+                <table class="table" id="tablaVentas">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Telefono</th>
+                        <th>Estilo</th>
+                        <th>Color</th>
+                        <th>Talla</th>
+                        <th>N Guia</th>
+                        <th>Direccion</th>
+                        <th>Envio</th>
+                        <th>Costo</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbodyVentas">
+                    <tr th:each="v : ${ventas}"
+                        class="fila-venta"
+                        th:data-estado="${v.estado != null ? v.estado.name() : ''}"
+                        th:data-mes="${#dates.format(v.fechaVentaDate, 'yyyy-MM')}"
+                        th:data-mes-label="${#dates.format(v.fechaVentaDate, 'MMMM yyyy')}"
+                        th:data-search="${(v.numeroGuia != null ? v.numeroGuia : '') + ' ' + (v.telefonoReferencia != null ? v.telefonoReferencia : '') + ' ' + (v.direccionEnvio != null ? v.direccionEnvio : '')}">
+                        <td th:text="${v.codigoVenta}"></td>
+                        <td th:text="${#dates.format(v.fechaVentaDate, 'dd/MM/yy HH:mm')}"></td>
+                        <td th:text="${v.telefonoReferencia}"></td>
+                        <td><span class="estilo-chip" th:text="${v.estilo != null ? v.estilo.etiqueta : '-'}"></span></td>
+                        <td>
+                            <span class="color-wrap">
+                                <span class="dot" th:classappend="${v.color != null ? 'dot-' + v.color.name() : ''}"></span>
+                                <span th:text="${v.color != null ? v.color.etiqueta : '-'}"></span>
+                            </span>
+                        </td>
+                        <td><span class="talla-badge" th:text="${v.numeroZapato}"></span></td>
+                        <td><span style="font-family:monospace;font-size:.85rem" th:text="${v.numeroGuia != null ? v.numeroGuia : '-'}"></span></td>
+                        <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"
+                            th:text="${v.direccionEnvio != null ? v.direccionEnvio : '-'}"
+                            th:title="${v.direccionEnvio}"></td>
+                        <td th:text="${v.costoEnvio != null ? 'Q. ' + #numbers.formatDecimal(v.costoEnvio, 1, 2) : '-'}"></td>
+                        <td>Q. <span th:text="${#numbers.formatDecimal(v.costo != null ? v.costo : 0, 1, 2)}"></span></td>
+                        <td style="font-weight:700;color:var(--primary)">
+                            Q. <span th:text="${#numbers.formatDecimal(v.total, 1, 2)}"></span>
+                        </td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${'badge-' + (v.estado != null ? v.estado.name() : 'PAGADO')}"
+                                  th:text="${v.estado != null ? v.estado.etiqueta : '-'}"></span>
+                        </td>
+                        <td>
+                            <a th:href="@{/ventas/editar/{token}(token=${v.encryptedId})}" class="btn btn-secondary btn-sm">Editar</a>
+                            <button class="btn btn-danger btn-sm btn-delete"
+                                    th:data-url="@{/ventas/eliminar/{token}(token=${v.encryptedId})}"
+                                    th:data-name="'Venta #' + ${v.codigoVenta}">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(ventas)}">
+                        <td colspan="13" style="text-align:center;padding:32px;color:var(--text-muted)">
+                            No hay ventas registradas. <a th:href="@{/ventas/nuevo}">Registrar primera venta</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div id="sinResultados" style="display:none;text-align:center;padding:24px;color:var(--text-muted)">
+                    No hay ventas que coincidan con el filtro.
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div th:replace="~{fragments/layout :: deleteModal}"></div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<script>
+// ── Capitaliza primera letra ──
+function capitalizarMes(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// ── Agrupamiento por mes ──
+function reagruparPorMes(filas) {
+    const tbody = document.getElementById('tbodyVentas');
+    // Quitar separadores anteriores
+    tbody.querySelectorAll('.mes-separator').forEach(el => el.remove());
+
+    // Ordenar filas visibles por data-mes DESC
+    const visibles = [...filas].filter(tr => tr.style.display !== 'none');
+    if (visibles.length === 0) return;
+
+    let mesActual = null;
+    visibles.forEach(tr => {
+        const mes = tr.dataset.mes;
+        const mesLabel = capitalizarMes(tr.dataset.mesLabel || mes);
+        if (mes !== mesActual) {
+            mesActual = mes;
+            // Contar cuantas filas hay de ese mes y que son visibles
+            const countMes = visibles.filter(r => r.dataset.mes === mes).length;
+            const sep = document.createElement('tr');
+            sep.className = 'mes-separator';
+            sep.innerHTML = `<td colspan="13" style="padding:0 0 0 0;background:transparent;border:none;">
+                <div class="mes-header">
+                    <span class="mes-header-label">${mesLabel}</span>
+                    <span class="mes-header-line"></span>
+                    <span class="mes-header-count">${countMes} venta${countMes !== 1 ? 's' : ''}</span>
+                </div>
+            </td>`;
+            tbody.insertBefore(sep, tr);
+        }
+    });
+}
+
+const filas = [...document.querySelectorAll('.fila-venta')];
+const sinRes = document.getElementById('sinResultados');
+let filtroActivo = 'ALL', busqueda = '';
+
+function aplicarFiltros() {
+    let visible = 0;
+    filas.forEach(tr => {
+        const match = (filtroActivo === 'ALL' || tr.dataset.estado === filtroActivo)
+                   && (busqueda === '' || (tr.dataset.search || '').toLowerCase().includes(busqueda));
+        tr.style.display = match ? '' : 'none';
+        if (match) visible++;
+    });
+    sinRes.style.display = (visible === 0 && filas.length > 0) ? 'block' : 'none';
+    reagruparPorMes(filas);
+}
+
+document.querySelectorAll('.filtro-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filtroActivo = btn.dataset.filter;
+        aplicarFiltros();
+    });
+});
+
+document.getElementById('busquedaInput').addEventListener('input', e => {
+    busqueda = e.target.value.toLowerCase().trim();
+    aplicarFiltros();
+});
+
+// Agrupamiento inicial
+reagruparPorMes(filas);
+</script>
+</body>
+</html>
