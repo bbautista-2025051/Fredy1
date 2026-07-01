@@ -87,6 +87,15 @@ public class Venta {
         return new java.util.Date(this.fechaVenta);
     }
 
+    // Zona horaria fija de Guatemala (UTC-6), independiente del timezone del servidor.
+    private static final java.time.ZoneId ZONA_GT = java.time.ZoneId.of("America/Guatemala");
+
+    // Usar este getter en las vistas (Thymeleaf #temporals) para mostrar la hora
+    // correcta de Guatemala sin importar en qué timezone corra el servidor (Railway = UTC).
+    public java.time.ZonedDateTime getFechaVentaGt() {
+        return java.time.Instant.ofEpochMilli(this.fechaVenta).atZone(ZONA_GT);
+    }
+
     public BigDecimal getTotal() {
         BigDecimal envio = (costoEnvio != null) ? costoEnvio : BigDecimal.ZERO;
         BigDecimal base  = (costo != null) ? costo : BigDecimal.ZERO;

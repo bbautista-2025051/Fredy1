@@ -27,9 +27,9 @@
                         <tr><th>#</th><th>Fecha</th><th>Teléfono</th><th>Total</th><th>Estado</th><th>Acción</th></tr>
                         </thead>
                         <tbody>
-                        <tr th:each="v : ${ventasRecientes}">
-                            <td th:text="${v.codigoVenta}"></td>
-                            <td th:text="${#dates.format(new java.util.Date(v.fechaVenta), 'dd/MM/yyyy')}"></td>
+                        <tr th:each="v, stat : ${ventasRecientes}">
+                            <td th:text="${stat.count}"></td>
+                            <td th:text="${#temporals.format(v.fechaVentaGt, 'dd/MM/yyyy')}"></td>
                             <td th:text="${v.telefonoReferencia != null ? v.telefonoReferencia : 'N/A'}"></td>
                             <td>Q. <span th:text="${#numbers.formatDecimal(v.total, 1, 2)}"></span></td>
                             <td>

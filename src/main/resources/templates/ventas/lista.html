@@ -151,14 +151,14 @@
                     </tr>
                     </thead>
                     <tbody id="tbodyVentas">
-                    <tr th:each="v : ${ventas}"
+                    <tr th:each="v, stat : ${ventas}"
                         class="fila-venta"
                         th:data-estado="${v.estado != null ? v.estado.name() : ''}"
-                        th:data-mes="${#dates.format(v.fechaVentaDate, 'yyyy-MM')}"
-                        th:data-mes-label="${#dates.format(v.fechaVentaDate, 'MMMM yyyy')}"
+                        th:data-mes="${#temporals.format(v.fechaVentaGt, 'yyyy-MM')}"
+                        th:data-mes-label="${#temporals.format(v.fechaVentaGt, 'MMMM yyyy')}"
                         th:data-search="${(v.numeroGuia != null ? v.numeroGuia : '') + ' ' + (v.telefonoReferencia != null ? v.telefonoReferencia : '') + ' ' + (v.direccionEnvio != null ? v.direccionEnvio : '')}">
-                        <td th:text="${v.codigoVenta}"></td>
-                        <td th:text="${#dates.format(v.fechaVentaDate, 'dd/MM/yy HH:mm')}"></td>
+                        <td th:text="${stat.count}"></td>
+                        <td th:text="${#temporals.format(v.fechaVentaGt, 'dd/MM/yy HH:mm')}"></td>
                         <td th:text="${v.telefonoReferencia}"></td>
                         <td><span class="estilo-chip" th:text="${v.estilo != null ? v.estilo.etiqueta : '-'}"></span></td>
                         <td>
